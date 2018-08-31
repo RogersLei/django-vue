@@ -1,4 +1,5 @@
 .idea/
 .log
 *.class
-.DS_Store*
+**/*.DS_Store
+**/*.pyc
