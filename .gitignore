@@ -3,4 +3,5 @@
 *.class
 **/*.DS_Store
 **/*.pyc
-**/*.node_modules
+**/node_modules
+**/*.vscode
