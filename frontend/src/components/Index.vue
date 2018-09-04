@@ -1,6 +1,8 @@
 <template>
   <div>
     <el-button type="primary" round @click="handleShowCreate">增加书籍</el-button>
+    <el-input v-model="search" placeholder="请输入内容" style="width: 200px"  @keyup.enter.native="handleSearch"/>
+    <el-button type="primary" round @click="handleSearch">搜索</el-button>
     <el-table :data="booksData" height="250" border style="width: 600px; margin: 40px auto;"  v-loading="loading">
       <el-table-column
         prop="book_name"
@@ -62,7 +64,7 @@ export default {
   name: 'index',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App',
+      search: '',
       booksData: [],
       oldData: {},
       updateData: {},
@@ -120,9 +122,18 @@ export default {
     },
     handleUpdate (index, row) {
       this.dialogUpdateVisible = true
-      this.updateData.name = this.oldData.name = row.book_name
-      this.updateData.price = this.oldData.price = row.book_price
-      this.updateData.id = this.oldData.id = row.id
+      this.updateData = Object.assign({}, {
+        id: row.id,
+        name: row.book_name,
+        price: row.book_price,
+        time: row.book_time
+      })
+      this.oldData = Object.assign({}, {
+        id: row.id,
+        name: row.book_name,
+        price: row.book_price,
+        time: row.book_time
+      })
     },
     handleDelete (index, row) {
       this.$confirm(`are you sure to delete ${this.updateData.name} ?`, '', {
@@ -158,6 +169,33 @@ export default {
           this.handleRead()
         } else {
           this.$message.error("can't read books database")
+        }
+      })
+    },
+    handleSearch () {
+      this.$axios.get('search', {
+        params: {
+          content: this.search
+        }
+      }).then(res => {
+        if (res.data.code === 200) {
+          if (res.data.data && JSON.parse(res.data.data).length > 0) {
+            this.booksData = []
+            let books = JSON.parse(res.data.data)
+            for (let i in books) {
+              let obj = {
+                id: books[i].pk,
+                book_name: books[i].fields.book_name,
+                book_price: Number(books[i].fields.book_price),
+                book_time: books[i].fields.book_time
+              }
+              this.booksData.push(obj)
+            }
+          } else {
+            this.$message.error(`can't search contains of '${this.search}' in database`)
+          }
+        } else {
+          this.$message.error(`can't search books in database`)
         }
       })
     }

@@ -16,6 +16,22 @@ from crud.models import Books
 def index(request):
     return HttpResponse("Hello, world. You're at the CRUD index.")
 
+def search(request):
+    content = request.GET['content']
+    try:
+        books = serializers.serialize("json",Books.objects.filter(book_name__contains=content))
+        res = {
+            "code": 200,
+            "data": books
+        }
+        print(books)
+    except Exception,e:
+        res = {
+            "code": 0,
+            "errMsg": e
+        }
+    return HttpResponse(json.dumps(res), content_type="application/json")
+
 def create(request):
     print('create')
     obj = json.loads(request.body)
